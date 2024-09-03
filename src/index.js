@@ -11,7 +11,6 @@ connectDB();
 
 app.use(express.json());
 
-// Placeholder para futuras rotas
 app.get('/', (req, res) => {
     res.send('API File Listing');
 });
