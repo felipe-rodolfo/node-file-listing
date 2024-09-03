@@ -14,6 +14,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.send('API File Listing');
 });
+app.use('/api/auth', require('./routes/auth'));
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
