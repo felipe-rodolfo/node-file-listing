@@ -47,7 +47,7 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
     }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, upload.single('file'), async (req, res) => {
     const { title, description, publicationDate } = req.body;
 
     try {
@@ -60,12 +60,21 @@ router.put('/:id', authMiddleware, async (req, res) => {
             return res.status(401).json({ msg: 'Não autorizado' });
         }
 
-        file = await File.findByIdAndUpdate(
-            req.params.id,
-            { title, description, publicationDate },
-            { new: true }
-        );
+        if (req.file) {
+            file.filePath = req.file.path;
+        }
 
+        if (title) {
+            file.title = title;
+        }
+        if (description) {
+            file.description = description;
+        }
+        if (publicationDate) {
+            file.publicationDate = publicationDate;
+        }
+
+        file = await file.save();
         res.json(file);
     } catch (err) {
         console.error(err.message);
