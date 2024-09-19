@@ -34,18 +34,20 @@ router.get('/', authMiddleware, async (req, res) => {
         filters.publicationDate = { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) };
     } else if (lastYear) {
         filters.publicationDate = { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 1)) };
-    } else if (startDate && endDate) {
-        if (new Date(startDate) > new Date(endDate)) {
-            return res.status(400).json({ message: 'A data inicial não pode ser maior que a data final.' });
+    } else if (startDate || endDate) {
+        if (startDate && endDate) {
+            if (new Date(startDate) > new Date(endDate)) {
+                return res.status(400).json({ message: 'A data inicial não pode ser maior que a data final.' });
+            }
+            filters.publicationDate = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        } else if (startDate) {
+            filters.publicationDate = { $gte: new Date(startDate) };
+        } else if (endDate) {
+            filters.publicationDate = { $lte: new Date(endDate) };
         }
-        filters.publicationDate = {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate)
-        };
-    } else if (startDate) {
-        filters.publicationDate = { $gte: new Date(startDate) };
-    } else if (endDate) {
-        filters.publicationDate = { $lte: new Date(endDate) };
     }
 
     try {
@@ -66,6 +68,7 @@ router.get('/', authMiddleware, async (req, res) => {
         res.status(500).send('Erro no servidor');
     }
 });
+
 
 router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
     const { title, description, publicationDate } = req.body;
